@@ -170,6 +170,10 @@
 - [Onako2](https://github.com/Onako2)
 
 
+### 翻译提供或修正
+- 越南语 [Mytai20100](https://github.com/Mytai20100)
+
+
 ### AI 大模型
 - [DeepSeek](https://www.deepseek.com/)
 

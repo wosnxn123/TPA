@@ -253,6 +253,10 @@ public class LanguageConfig extends Configuration {
         languageFile = new File(PLUGIN.getDataFolder(), "language/pl_PL.yml");
         if (!languageFile.exists()) PLUGIN.saveResource("language/pl_PL.yml", false);
         new LanguageConfig(languageFile);
+        // 越南语
+        languageFile = new File(PLUGIN.getDataFolder(), "language/vi_VN.yml");
+        if (!languageFile.exists()) PLUGIN.saveResource("language/vi_VN.yml", false);
+        new LanguageConfig(languageFile);
     }
 
     public static LanguageConfig getLanguage() {

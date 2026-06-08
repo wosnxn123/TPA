@@ -167,6 +167,11 @@ This plugin uses [FoliaLib](https://github.com/handyplus/FoliaLib) for **Folia**
 - [xiaoleaw](https://github.com/xiaoleaw)
 - [Onako2](https://github.com/Onako2)
 
+
+### Translation provided or corrected
+- Vietnamese [Mytai20100](https://github.com/Mytai20100)
+
+
 ### AI Models
 - [DeepSeek](https://www.deepseek.com/)
 
