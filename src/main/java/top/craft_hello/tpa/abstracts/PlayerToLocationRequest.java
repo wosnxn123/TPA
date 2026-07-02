@@ -9,6 +9,8 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
 import top.craft_hello.tpa.utils.SendMessageUtil;
 import top.craft_hello.tpa.enums.CommandType;
 import top.craft_hello.tpa.enums.PermissionType;
@@ -130,45 +132,116 @@ public abstract class PlayerToLocationRequest extends Request {
                     SendMessageUtil.titleGenerateRandomLocationMessage(requestPlayer);
                     if (config.isEnableSound()) PlayerSchedulerUtil.playSound(requestPlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
                 }
-                location = requestPlayer.getLocation();
-                while (true) {
-                    int limitX = config.getRtpLimitX();
-                    int limitZ = config.getRtpLimitZ();
-                    double x;
-                    double z;
-                    int y;
-                    switch (world.getEnvironment()){
-                        case NETHER:
-                            x = random.nextDouble(location.getX() - limitX,location.getX() + limitX);
-                            z = random.nextDouble(location.getZ() - limitZ, location.getZ() + limitZ);
-                            location.setX(x);
-                            location.setZ(z);
-                            y = world.getHighestBlockYAt((int) location.getX(), (int) location.getZ(), HeightMap.WORLD_SURFACE);
-                            location.setY(y);
-                            break;
-                        case THE_END:
-                            x = random.nextDouble(-100,100);
-                            z = random.nextDouble(-100,100);
-                            location.setX(x);
-                            location.setZ(z);
-                            y = world.getHighestBlockYAt((int) location.getX(), (int) location.getZ(), HeightMap.WORLD_SURFACE);
-                            location.setY(y);
-                            break;
-                        default:
-                            x = random.nextDouble(location.getX() - limitX,location.getX() + limitX);
-                            z = random.nextDouble(location.getZ() - limitZ, location.getZ() + limitZ);
-                            location.setX(x);
-                            location.setZ(z);
-                            y = world.getHighestBlockYAt((int) location.getX(), (int) location.getZ(), HeightMap.WORLD_SURFACE);
-                            location.setY(y);
+                Location playerLocation = requestPlayer.getLocation();
+                if (HandySchedulerUtil.isFolia()) {
+                    // Folia/Canvas: getHighestBlockYAt/getBlockAt read the chunk synchronously
+                    // and must execute on the region thread owning the target chunk. Load the
+                    // chunk asynchronously and read the height inside the (region-thread)
+                    // callback. The RTP rtpTimer in teleport() polls `location` until it is
+                    // non-null, so resolving it asynchronously is safe.
+                    generateRtpLocationAsync(world, playerLocation, config);
+                } else {
+                    // Paper/Bukkit: original synchronous behaviour, no overhead.
+                    location = playerLocation;
+                    while (true) {
+                        int limitX = config.getRtpLimitX();
+                        int limitZ = config.getRtpLimitZ();
+                        double x;
+                        double z;
+                        int y;
+                        switch (world.getEnvironment()){
+                            case NETHER:
+                                x = random.nextDouble(location.getX() - limitX,location.getX() + limitX);
+                                z = random.nextDouble(location.getZ() - limitZ, location.getZ() + limitZ);
+                                location.setX(x);
+                                location.setZ(z);
+                                y = world.getHighestBlockYAt((int) location.getX(), (int) location.getZ(), HeightMap.WORLD_SURFACE);
+                                location.setY(y);
+                                break;
+                            case THE_END:
+                                x = random.nextDouble(-100,100);
+                                z = random.nextDouble(-100,100);
+                                location.setX(x);
+                                location.setZ(z);
+                                y = world.getHighestBlockYAt((int) location.getX(), (int) location.getZ(), HeightMap.WORLD_SURFACE);
+                                location.setY(y);
+                                break;
+                            default:
+                                x = random.nextDouble(location.getX() - limitX,location.getX() + limitX);
+                                z = random.nextDouble(location.getZ() - limitZ, location.getZ() + limitZ);
+                                location.setX(x);
+                                location.setZ(z);
+                                y = world.getHighestBlockYAt((int) location.getX(), (int) location.getZ(), HeightMap.WORLD_SURFACE);
+                                location.setY(y);
+                        }
+                        Block feetBlock = world.getBlockAt(location);
+                        if (feetBlock.getType().isSolid()) break;
                     }
-                    Block feetBlock = world.getBlockAt(location);
-                    if (feetBlock.getType().isSolid()) break;
                 }
                 break;
             default:
                 throw new ErrorRuntimeException(requestObject, "在 objects.PlayerToLocationRequest : 35行，请联系开发者（https://github.com/WarSkyGod/TPA/issues）");
         }
+    }
+
+    /**
+     * Folia/Canvas 兼容：异步加载目标区块并在区块所在 region 线程读取高度。
+     * 不能同步调用 getHighestBlockYAt/getBlockAt（会抛 "Cannot retrieve chunk asynchronously"）。
+     * 通过 getChunkAtAsync 异步获取区块，在回调（区块所在 region 线程）里读取最高方块
+     * 高度并判断是否为实心方块。若不是则重新随机坐标并重试，最多尝试 {@value #RTP_MAX_ATTEMPTS} 次。
+     * 成功后写入 {@link #location}，由 RTP 的 rtpTimer 轮询触发传送（见 teleport()）。
+     */
+    private static final int RTP_MAX_ATTEMPTS = 64;
+
+    private void generateRtpLocationAsync(World world, Location origin, Config config) {
+        generateRtpLocationAsync(world, origin, config, 0);
+    }
+
+    private void generateRtpLocationAsync(final World world, final Location origin, final Config config, final int attempt) {
+        if (attempt >= RTP_MAX_ATTEMPTS) {
+            // 超过最大尝试次数仍无合适位置：保持 location 为 null，
+            // rtpTimer 会在超时后抛出 RtpFailedException 通知玩家。
+            return;
+        }
+        int limitX = config.getRtpLimitX();
+        int limitZ = config.getRtpLimitZ();
+        final double x;
+        final double z;
+        switch (world.getEnvironment()) {
+            case NETHER:
+                x = random.nextDouble(origin.getX() - limitX, origin.getX() + limitX);
+                z = random.nextDouble(origin.getZ() - limitZ, origin.getZ() + limitZ);
+                break;
+            case THE_END:
+                x = random.nextDouble(-100, 100);
+                z = random.nextDouble(-100, 100);
+                break;
+            default:
+                x = random.nextDouble(origin.getX() - limitX, origin.getX() + limitX);
+                z = random.nextDouble(origin.getZ() - limitZ, origin.getZ() + limitZ);
+                break;
+        }
+        final int blockX = (int) x;
+        final int blockZ = (int) z;
+        // getChunkAtAsync 接收区块坐标（block >> 4），回调在拥有该区块的 region 线程执行
+        Consumer<Chunk> onChunkLoaded = new Consumer<Chunk>() {
+            @Override
+            public void accept(Chunk chunk) {
+                try {
+                    int y = world.getHighestBlockYAt(blockX, blockZ, HeightMap.WORLD_SURFACE);
+                    Block feetBlock = world.getBlockAt(blockX, y, blockZ);
+                    if (feetBlock.getType().isSolid()) {
+                        location = new Location(world, x, y, z);
+                    } else {
+                        // 重新随机一个坐标并异步重试
+                        generateRtpLocationAsync(world, origin, config, attempt + 1);
+                    }
+                } catch (Throwable ignored) {
+                    generateRtpLocationAsync(world, origin, config, attempt + 1);
+                }
+            }
+        };
+        world.getChunkAtAsync(blockX >> 4, blockZ >> 4, onChunkLoaded);
     }
 
     protected void setTimer(long delay){
