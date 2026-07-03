@@ -9,12 +9,14 @@ import top.craft_hello.tpa.exceptions.ErrorWarpNotFoundException;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.isNull;
 
 public class WarpConfig extends Configuration {
     private static volatile WarpConfig instance;
-    private static final Map<String, Location> LOCATIONS = new HashMap<>();
+    private static final Map<String, Location> LOCATIONS = new ConcurrentHashMap<>()
+            ;
 
     private WarpConfig() {
         this.configurationFile = new File(PLUGIN.getDataFolder(), "warp.yml");

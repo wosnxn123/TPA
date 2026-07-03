@@ -1,5 +1,6 @@
 package top.craft_hello.tpa.events;
 
+import cn.handyplus.lib.adapter.HandySchedulerUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,7 +13,9 @@ public class TPAPlayerLocaleChangeEvent implements Listener {
     public void onPlayerDeath(PlayerLocaleChangeEvent playerLocaleChangeEvent){
         Player player = playerLocaleChangeEvent.getPlayer();
         String languageStr = playerLocaleChangeEvent.getLocale();
-        PlayerDataConfig playerDataConfig = PlayerDataConfig.getPlayerData(player);
-        if (!playerDataConfig.isSetlang()) PlayerDataConfig.getPlayerData(player).setLanguage(languageStr);
+        HandySchedulerUtil.runTaskAsynchronously(() -> {
+            PlayerDataConfig playerDataConfig = PlayerDataConfig.getPlayerData(player);
+            if (!playerDataConfig.isSetlang()) PlayerDataConfig.getPlayerData(player).setLanguage(languageStr);
+        });
     }
 }

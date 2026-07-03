@@ -15,7 +15,6 @@ public class TPAPlayerTeleportEvent implements Listener {
         switch (playerTeleportEvent.getCause()){
             case COMMAND:
             case PLUGIN:
-            case UNKNOWN:
                 PlayerDataConfig.getPlayerData(player).setLastLocation(lastLocation);
                 break;
         }

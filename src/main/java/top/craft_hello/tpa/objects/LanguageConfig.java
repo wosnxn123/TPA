@@ -15,15 +15,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.isNull;
 import static top.craft_hello.tpa.utils.LoadingConfigUtil.getConfig;
 
 public class LanguageConfig extends Configuration {
-    private static final Map<String, LanguageConfig> LANGUAGES = new HashMap<>();
+    private static final Map<String, LanguageConfig> LANGUAGES = new ConcurrentHashMap<>();
 
     public LanguageConfig(String languageStr){
         this(new File(PLUGIN.getDataFolder(), "language/" + languageStr + ".yml"));

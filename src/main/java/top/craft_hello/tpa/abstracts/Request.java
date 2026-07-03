@@ -11,10 +11,10 @@ import org.jetbrains.annotations.NotNull;
 import top.craft_hello.tpa.utils.SendMessageUtil;
 import top.craft_hello.tpa.interfaces.RequestInterface;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static top.craft_hello.tpa.utils.LoadingConfigUtil.getConfig;
 
@@ -26,8 +26,8 @@ public abstract class Request implements RequestInterface {
     protected HandyRunnable useCommandTimer;
     protected long delay;
     protected Location location;
-    protected final static Map<Player, Request> REQUEST_QUEUE = new HashMap<>();
-    protected final static Map<Player, String> COMMAND_DELAY_QUEUE = new HashMap<>();
+    protected final static Map<Player, Request> REQUEST_QUEUE = new ConcurrentHashMap<>();
+    protected final static Map<Player, String> COMMAND_DELAY_QUEUE = new ConcurrentHashMap<>();
 
 
     protected void setCountdownMessageTimer(@NotNull Player player, @NotNull String target){

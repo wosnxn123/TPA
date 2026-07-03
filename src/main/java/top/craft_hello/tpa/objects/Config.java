@@ -10,9 +10,9 @@ import top.craft_hello.tpa.enums.PermissionType;
 import top.craft_hello.tpa.utils.SendMessageUtil;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.isNull;
 import static top.craft_hello.tpa.utils.VersionUtil.versionComparison;
@@ -30,14 +30,14 @@ public class Config extends Configuration {
     private int acceptDelay;
     private boolean enableTeleportDelay;
     private boolean enableCommandDelay;
-    private final Map<PermissionType, Integer> TELEPORT_DELAYS = new HashMap<>();
-    private final Map<PermissionType, Integer> COMMAND_DELAYS = new HashMap<>();
-    private final Map<CommandType, Boolean> ENABLE_COMMANDS = new HashMap<>();
-    private final Map<PermissionType, Boolean> ENABLE_PERMISSIONS = new HashMap<>();
+    private final Map<PermissionType, Integer> TELEPORT_DELAYS = new ConcurrentHashMap<>();
+    private final Map<PermissionType, Integer> COMMAND_DELAYS = new ConcurrentHashMap<>();
+    private final Map<CommandType, Boolean> ENABLE_COMMANDS = new ConcurrentHashMap<>();
+    private final Map<PermissionType, Boolean> ENABLE_PERMISSIONS = new ConcurrentHashMap<>();
     private List<String> rtpDisableWorlds;
     private int rtpLimitX;
     private int rtpLimitZ;
-    private final Map<PermissionType, Integer> HOME_AMOUNTS = new HashMap<>();
+    private final Map<PermissionType, Integer> HOME_AMOUNTS = new ConcurrentHashMap<>();
 
 
     private Config() {
