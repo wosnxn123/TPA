@@ -1,5 +1,31 @@
+## Fork 修改说明
+
+本 fork 基于 [WarSkyGod/TPA](https://github.com/WarSkyGod/TPA)，修复了 `/rtp` 随机传送在 Folia/Canvas 上的崩溃问题。
+
+### 修改内容
+
+- **修复 `/rtp` 跨区域崩溃**：修复了 `/rtp` 随机传送在 Folia/Canvas 上执行时的崩溃（`Cannot retrieve chunk asynchronously`）。
+- **异步区块加载**：将 `getHighestBlockYAt`/`getBlockAt` 改为异步 —— 使用 `world.getChunkAtAsync` 异步加载区块，在区块所在区域线程的回调里读取方块高度，避免阻塞主线程/区域线程。
+- **安全落点重试**：最多重试 64 次以找到安全的随机落点。
+
+### 兼容性
+
+| 服务端 | 兼容性 | 说明 |
+|--------|--------|------|
+| Folia | ✅ 兼容 | 走异步区块加载逻辑 |
+| Canvas | ✅ 兼容 | 走异步区块加载逻辑 |
+| Paper/Purpur | ✅ 兼容 | 走原有同步逻辑 |
+
+### 构建方式
+
+```bash
+mvn package -DskipTests
+```
+
+**Java 版本要求**：Java 21
 
 ---
+
 # TPA
 [English](https://github.com/WarSkyGod/TPA/blob/main/README_en-US.md)
 
