@@ -22,7 +22,13 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Build
-        run: mvn package -DskipTests -q
+        run: |
+          for i in 1 2 3 4 5; do
+            mvn package -DskipTests -q && exit 0
+            echo "Build attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+          exit 1
       - uses: actions/upload-artifact@v4
         with:
           name: TPA
