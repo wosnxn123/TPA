@@ -162,6 +162,7 @@
 - [Ukiyograin](https://github.com/Ukiyograin)
 - [xszx-tbh](https://github.com/xszx-tbh)
 - [Carrot520](https://github.com/Carrot520)
+- [NightCat](https://github.com/nightlight-hk)
 
 
 ### 功能建议者

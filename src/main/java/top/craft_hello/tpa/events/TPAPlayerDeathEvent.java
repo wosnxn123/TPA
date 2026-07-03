@@ -1,5 +1,6 @@
 package top.craft_hello.tpa.events;
 
+import cn.handyplus.lib.adapter.HandySchedulerUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,8 @@ public class TPAPlayerDeathEvent implements Listener {
     public void onPlayerDeath(PlayerDeathEvent playerDeathEvent){
         Player player = playerDeathEvent.getEntity();
         Location lastLocation = player.getLocation();
-        PlayerDataConfig.getPlayerData(player).setLastLocation(lastLocation);
+        HandySchedulerUtil.runTaskAsynchronously(() -> {
+            PlayerDataConfig.getPlayerData(player).setLastLocation(lastLocation);
+        });
     }
 }

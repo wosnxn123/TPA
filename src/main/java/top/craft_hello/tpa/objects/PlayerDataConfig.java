@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.C;
 import top.craft_hello.tpa.abstracts.ErrorException;
 import top.craft_hello.tpa.utils.SendMessageUtil;
 import top.craft_hello.tpa.abstracts.Configuration;
@@ -17,17 +18,18 @@ import top.craft_hello.tpa.exceptions.*;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.isNull;
 import static top.craft_hello.tpa.utils.LoadingConfigUtil.getConfig;
 
 public class PlayerDataConfig extends Configuration {
-    private static final Map<UUID, PlayerDataConfig> PLAYER_DATAS = new HashMap<>();
+    private static final Map<UUID, PlayerDataConfig> PLAYER_DATAS = new ConcurrentHashMap<>();
     private Player player;
     private String playerName;
     private String defaultHomeName;
     private boolean setlang;
-    private final Map<String, Location> HOMES = new HashMap<>();
+    private final Map<String, Location> HOMES = new ConcurrentHashMap<>();
     private List<String> denyList = new ArrayList<>();
     private UUID playerUUID;
     private Location lastLocation;

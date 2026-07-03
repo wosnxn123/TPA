@@ -161,6 +161,7 @@ This plugin uses [FoliaLib](https://github.com/handyplus/FoliaLib) for **Folia**
 - [Ukiyograin](https://github.com/Ukiyograin)
 - [xszx-tbh](https://github.com/xszx-tbh)
 - [Carrot520](https://github.com/Carrot520)
+- [NightCat](https://github.com/nightlight-hk)
 
 ### Feature Suggesters
 - [Apleax](https://github.com/Apleax)

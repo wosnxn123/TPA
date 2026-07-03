@@ -20,40 +20,42 @@ public class TPAPlayerJoinEvent implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent playerJoinEvent) {
         Player player = playerJoinEvent.getPlayer();
-        PlayerDataConfig playerDataConfig = PlayerDataConfig.getPlayerData(player);
-        Config config = getConfig();
-        if (!config.isOldServer() && !playerDataConfig.isSetlang()) {
-            String lang = playerDataConfig.getLanguageStr();
-            String clientLang = player.getLocale();
-            if (lang != null && lang.equalsIgnoreCase(clientLang)) {
-                playerDataConfig.setLanguage(clientLang);
-            }
-        }
-        if (!config.isOldServer() && !playerDataConfig.isSetlang()) {
-            String lang = playerDataConfig.getLanguageStr();
-            String clientLang = player.getLocale();
-            if (lang != null && lang.equalsIgnoreCase(clientLang)) {
-                playerDataConfig.setLanguage(clientLang);
-            }
-        }
-        try {
-            if (config.isForceSpawn()) {
-                if (getSpawnConfig() != null) {
-                    Location location = getSpawnConfig().getSpawnLocation(null);
-                    if (location != null) {
-                        teleport(player, location);
-                    }
+        HandySchedulerUtil.runTaskAsynchronously(() -> {
+            PlayerDataConfig playerDataConfig = PlayerDataConfig.getPlayerData(player);
+            Config config = getConfig();
+            if (!config.isOldServer() && !playerDataConfig.isSetlang()) {
+                String lang = playerDataConfig.getLanguageStr();
+                String clientLang = player.getLocale();
+                if (lang != null && lang.equalsIgnoreCase(clientLang)) {
+                    playerDataConfig.setLanguage(clientLang);
                 }
             }
-        } catch (Exception exception) {
-            if (config.isDebug()) {
-                exception.printStackTrace();
+            if (!config.isOldServer() && !playerDataConfig.isSetlang()) {
+                String lang = playerDataConfig.getLanguageStr();
+                String clientLang = player.getLocale();
+                if (lang != null && lang.equalsIgnoreCase(clientLang)) {
+                    playerDataConfig.setLanguage(clientLang);
+                }
             }
-        }
-        if (config.isUpdateCheck() && config.hasPermission(player, PermissionType.VERSION)) {
-            HandySchedulerUtil.runTaskAsynchronously(() -> {
-                ErrorCheckUtil.executeCommand(player, null, "version");
-            });
-        }
+            try {
+                if (config.isForceSpawn()) {
+                    if (getSpawnConfig() != null) {
+                        Location location = getSpawnConfig().getSpawnLocation(null);
+                        if (location != null) {
+                            teleport(player, location);
+                        }
+                    }
+                }
+            } catch (Exception exception) {
+                if (config.isDebug()) {
+                    exception.printStackTrace();
+                }
+            }
+            if (config.isUpdateCheck() && config.hasPermission(player, PermissionType.VERSION)) {
+                HandySchedulerUtil.runTaskAsynchronously(() -> {
+                    ErrorCheckUtil.executeCommand(player, null, "version");
+                });
+            }
+        });
     }
 }

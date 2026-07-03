@@ -1,5 +1,6 @@
 package top.craft_hello.tpa.abstracts;
 
+import cn.handyplus.lib.adapter.HandySchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -8,6 +9,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import top.craft_hello.tpa.objects.Config;
+import top.craft_hello.tpa.objects.PlayerDataConfig;
 import top.craft_hello.tpa.utils.SendMessageUtil;
 import top.craft_hello.tpa.interfaces.ConfigurationInterface;
 
@@ -64,8 +66,9 @@ public abstract class Configuration implements ConfigurationInterface {
     }
 
     protected void saveConfiguration(CommandSender sender) {
-        ErrorException.trySaveConfiguration(sender, configuration, configurationFile);
-        reloadConfiguration();
+        HandySchedulerUtil.runTaskAsynchronously(() ->{
+            ErrorException.trySaveConfiguration(sender, configuration, configurationFile);
+        });
     }
 
     protected Location loadLocation(String index) {
