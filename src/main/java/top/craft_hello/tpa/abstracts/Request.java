@@ -79,7 +79,7 @@ public abstract class Request implements RequestInterface {
     }
 
     public static void teleport(Player player, Location location) {
-        EntitySchedulerUtil.syncTeleport(player, location);
+        HandySchedulerUtil.runTaskAsynchronously(() -> EntitySchedulerUtil.syncTeleport(player, location));
     }
 
     public static Map<Player, Request> getRequestQueue() {
