@@ -4,7 +4,7 @@
 
 ### 修改内容
 
-- **合入 upstream 3.3.1**：`/home`、`/back`、`/warp` 不再在 FoliaLib 实体调度外重复套一层异步调度，避免 Folia 区域线程死锁。
+- **合入 upstream 3.3.1**：`/home`、`/back`、`/warp` 的传送先派发到异步线程，再交给 FoliaLib 实体调度器，避免从区域线程直接进入可能阻塞的传送路径。
 - **修复 `/rtp` 跨区域崩溃**：修复 `/rtp` 在 Folia/Canvas 上执行时的 `Cannot retrieve chunk asynchronously` 崩溃。
 - **异步区块加载**：将 `getHighestBlockYAt`/`getBlockAt` 改为异步 —— 使用 `world.getChunkAtAsync` 异步加载区块，在区块所在区域线程的回调里读取方块高度，避免阻塞主线程/区域线程。
 - **安全落点重试**：最多重试 64 次以找到安全的随机落点。

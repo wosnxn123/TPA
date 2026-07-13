@@ -5,7 +5,7 @@ This fork is based on [WarSkyGod/TPA 3.3.1](https://github.com/WarSkyGod/TPA). I
 
 ### Changes
 
-- **Upstream 3.3.1 fix**: `/home`, `/back`, and `/warp` no longer add a redundant global asynchronous scheduling layer around FoliaLib entity teleport scheduling.
+- **Upstream 3.3.1 fix**: `/home`, `/back`, and `/warp` dispatch teleport work asynchronously before handing it to FoliaLib's entity scheduler, avoiding a potentially blocking teleport path from a region thread.
 - **Region-safe `/rtp`**: target chunks are loaded with `world.getChunkAtAsync`, then height and block data are read on the target region callback.
 - **Bounded retries**: random destination generation makes at most 64 attempts.
 - **Callback lifecycle protection**: retries stop when the player disconnects, movement cancels the request, or RTP times out.
