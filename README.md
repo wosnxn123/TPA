@@ -1,12 +1,14 @@
-## Fork 修改说明
+## Fork 3.3.1 修改说明
 
-本 fork 基于 [WarSkyGod/TPA](https://github.com/WarSkyGod/TPA)，修复了 `/rtp` 随机传送在 Folia/Canvas 上的崩溃问题。
+本 fork 基于 [WarSkyGod/TPA 3.3.1](https://github.com/WarSkyGod/TPA)，合入了 upstream 的 Folia 传送死锁修复，并保留了 `/rtp` 在 Folia/Canvas 上的异步区域安全实现。
 
 ### 修改内容
 
-- **修复 `/rtp` 跨区域崩溃**：修复了 `/rtp` 随机传送在 Folia/Canvas 上执行时的崩溃（`Cannot retrieve chunk asynchronously`）。
+- **合入 upstream 3.3.1**：`/home`、`/back`、`/warp` 不再在 FoliaLib 实体调度外重复套一层异步调度，避免 Folia 区域线程死锁。
+- **修复 `/rtp` 跨区域崩溃**：修复 `/rtp` 在 Folia/Canvas 上执行时的 `Cannot retrieve chunk asynchronously` 崩溃。
 - **异步区块加载**：将 `getHighestBlockYAt`/`getBlockAt` 改为异步 —— 使用 `world.getChunkAtAsync` 异步加载区块，在区块所在区域线程的回调里读取方块高度，避免阻塞主线程/区域线程。
 - **安全落点重试**：最多重试 64 次以找到安全的随机落点。
+- **回调生命周期保护**：玩家离线、移动取消或 RTP 超时后停止后续异步重试，并保证跨线程落点对轮询任务可见。
 
 ### 兼容性
 
@@ -29,7 +31,7 @@ mvn package -DskipTests
 # TPA
 [English](https://github.com/WarSkyGod/TPA/blob/main/README_en-US.md)
 
-一个支持 **Folia** 的简易传送插件，支持 **Bukkit/Spigot/Paper/Folia**。
+一个支持 **Folia/Canvas** 的简易传送插件，支持 **Bukkit/Spigot/Paper/Folia/Canvas**。
 
 ## 特点
 

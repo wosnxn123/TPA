@@ -25,7 +25,7 @@ public abstract class Request implements RequestInterface {
     protected HandyRunnable checkMoveTimer;
     protected HandyRunnable useCommandTimer;
     protected long delay;
-    protected Location location;
+    protected volatile Location location;
     protected final static Map<Player, Request> REQUEST_QUEUE = new ConcurrentHashMap<>();
     protected final static Map<Player, String> COMMAND_DELAY_QUEUE = new ConcurrentHashMap<>();
 

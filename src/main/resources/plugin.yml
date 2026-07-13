@@ -1,7 +1,7 @@
 name: ${project.name}
 version: ${project.version}
 main: top.craft_hello.tpa.TPA
-description: 一个支持 Folia 的简易传送插件，支持 Bukkit/Spigot/Paper/Folia
+description: 一个支持 Folia 和 Canvas 的简易传送插件，支持 Bukkit/Spigot/Paper/Folia/Canvas
 api-version: '1.13'
 author: WarSkyGod
 website: https://github.com/WarSkyGod/TPA

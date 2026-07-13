@@ -1,8 +1,36 @@
 
+## Fork 3.3.1 changes
+
+This fork is based on [WarSkyGod/TPA 3.3.1](https://github.com/WarSkyGod/TPA). It includes the upstream Folia teleport deadlock fix while retaining the region-safe asynchronous `/rtp` implementation for Folia and Canvas.
+
+### Changes
+
+- **Upstream 3.3.1 fix**: `/home`, `/back`, and `/warp` no longer add a redundant global asynchronous scheduling layer around FoliaLib entity teleport scheduling.
+- **Region-safe `/rtp`**: target chunks are loaded with `world.getChunkAtAsync`, then height and block data are read on the target region callback.
+- **Bounded retries**: random destination generation makes at most 64 attempts.
+- **Callback lifecycle protection**: retries stop when the player disconnects, movement cancels the request, or RTP times out.
+- **Paper compatibility**: regular Paper and Bukkit servers retain the original synchronous destination-selection path.
+
+### Compatibility
+
+| Server | Compatibility | Path |
+|--------|---------------|------|
+| Folia | Supported | Asynchronous chunk and target-region reads |
+| Canvas | Supported | Asynchronous chunk and target-region reads |
+| Paper/Purpur | Supported | Original synchronous path |
+
+### Build
+
+```bash
+mvn package -DskipTests
+```
+
+**Required Java version**: Java 21
+
 ---
 # TPA
 [简体中文](https://github.com/WarSkyGod/TPA)  
-A simple teleportation plugin that supports **Folia**, compatible with **Bukkit/Spigot/Paper/Folia**.
+A simple teleportation plugin that supports **Folia/Canvas**, compatible with **Bukkit/Spigot/Paper/Folia/Canvas**.
 
 ## Features
 

@@ -192,15 +192,22 @@ public abstract class PlayerToLocationRequest extends Request {
      * 成功后写入 {@link #location}，由 RTP 的 rtpTimer 轮询触发传送（见 teleport()）。
      */
     private static final int RTP_MAX_ATTEMPTS = 64;
+    private volatile boolean rtpGenerationActive;
 
     private void generateRtpLocationAsync(World world, Location origin, Config config) {
+        rtpGenerationActive = true;
         generateRtpLocationAsync(world, origin, config, 0);
     }
 
     private void generateRtpLocationAsync(final World world, final Location origin, final Config config, final int attempt) {
+        if (!rtpGenerationActive || !requestPlayer.isOnline()) {
+            rtpGenerationActive = false;
+            return;
+        }
         if (attempt >= RTP_MAX_ATTEMPTS) {
             // 超过最大尝试次数仍无合适位置：保持 location 为 null，
             // rtpTimer 会在超时后抛出 RtpFailedException 通知玩家。
+            rtpGenerationActive = false;
             return;
         }
         int limitX = config.getRtpLimitX();
@@ -227,11 +234,16 @@ public abstract class PlayerToLocationRequest extends Request {
         Consumer<Chunk> onChunkLoaded = new Consumer<Chunk>() {
             @Override
             public void accept(Chunk chunk) {
+                if (!rtpGenerationActive || !requestPlayer.isOnline()) {
+                    rtpGenerationActive = false;
+                    return;
+                }
                 try {
                     int y = world.getHighestBlockYAt(blockX, blockZ, HeightMap.WORLD_SURFACE);
                     Block feetBlock = world.getBlockAt(blockX, y, blockZ);
                     if (feetBlock.getType().isSolid()) {
                         location = new Location(world, x, y, z);
+                        rtpGenerationActive = false;
                     } else {
                         // 重新随机一个坐标并异步重试
                         generateRtpLocationAsync(world, origin, config, attempt + 1);
@@ -253,6 +265,7 @@ public abstract class PlayerToLocationRequest extends Request {
                     teleport();
                 } catch (Exception ignored){
                     REQUEST_QUEUE.remove(requestPlayer);
+                    rtpGenerationActive = false;
                     this.cancel();
                 }
             }
@@ -264,6 +277,7 @@ public abstract class PlayerToLocationRequest extends Request {
     protected void isMove(@NotNull Location lastLocation){
         if (requestPlayer.getLocation().getX() != lastLocation.getX() || requestPlayer.getLocation().getY() != lastLocation.getY() || requestPlayer.getLocation().getZ() != lastLocation.getZ()){
             REQUEST_QUEUE.remove(requestPlayer);
+            rtpGenerationActive = false;
             timer.cancel();
             checkMoveTimer.cancel();
             countdownMessageTimer.cancel();
@@ -348,6 +362,7 @@ public abstract class PlayerToLocationRequest extends Request {
                     public void run() {
                         try {
                             if (!isNull(location)){
+                                rtpGenerationActive = false;
                                 teleport(requestPlayer, location);
                                 if (getConfig().isEnableTitleMessage()) {
                                     SendMessageUtil.titleCountdownOverMessage(requestPlayer, targetName);
@@ -357,9 +372,11 @@ public abstract class PlayerToLocationRequest extends Request {
                                 this.cancel();
                             }
                             if (--sec < 0) {
+                                rtpGenerationActive = false;
                                 throw new RtpFailedException(requestPlayer);
                             }
                         } catch (Exception ignored) {
+                            rtpGenerationActive = false;
                             this.cancel();
                         }
                     }
